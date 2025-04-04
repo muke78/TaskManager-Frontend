@@ -1,15 +1,76 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTaskQueries } from '../hooks/useTaskQueries';
 import { v } from '../styles/variables';
 import { ModalAgregarTareas } from './ModalAgregarTareas';
 import { ModalEditarTareas } from './ModalEditarTareas';
 import Swal from 'sweetalert2';
 
-export const TableTask = () => {
-  const { data, isLoading, error, deleteTask } = useTaskQueries();
-  const [openModaSaveTask, setOpenModaSaveTask] = useState(false);
+export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
+  // Importamos los hooks de las tareas por medio de nuestros queries y nuestras mutaciones
+  const {
+    data,
+    dataActive,
+    dataComplete,
+    dataNotComplete,
+    isLoading,
+    isLoadingActive,
+    isLoadingComplete,
+    isLoadingNotComplete,
+    error,
+    errorActive,
+    errorComplete,
+    errorNotComplete,
+    deleteTask,
+  } = useTaskQueries();
+
   const [openModaUpdateTask, setOpenModaUpdateTask] = useState(false);
   const [selectedUser, setSelectedUser] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [displayData, setDisplayData] = useState([]);
+  const [isCurrentlyLoading, setIsCurrentlyLoading] = useState(true);
+  const [currentError, setCurrentError] = useState(null);
+  const [openFilterMenu, setOpenFilterMenu] = useState(false);
+
+  // Efecto para actualizar los datos mostrados según el filtro seleccionado
+  useEffect(() => {
+    switch (activeFilter) {
+      case 'Active':
+        setDisplayData(dataActive || []);
+        setIsCurrentlyLoading(isLoadingActive);
+        setCurrentError(errorActive);
+        break;
+      case 'Complete':
+        setDisplayData(dataComplete || []);
+        setIsCurrentlyLoading(isLoadingComplete);
+        setCurrentError(errorComplete);
+        break;
+      case 'ItWasNot':
+        setDisplayData(dataNotComplete || []);
+        setIsCurrentlyLoading(isLoadingNotComplete);
+        setCurrentError(errorNotComplete);
+        break;
+      case 'All':
+      default:
+        setDisplayData(data || []);
+        setIsCurrentlyLoading(isLoading);
+        setCurrentError(error);
+        break;
+    }
+  }, [
+    activeFilter,
+    data,
+    dataActive,
+    dataComplete,
+    dataNotComplete,
+    isLoading,
+    isLoadingActive,
+    isLoadingComplete,
+    isLoadingNotComplete,
+    error,
+    errorActive,
+    errorComplete,
+    errorNotComplete,
+  ]);
 
   // Callback para abrir modal de edición
   const handleOpenUpdateTask = useCallback((user) => {
@@ -31,84 +92,175 @@ export const TableTask = () => {
         theme: 'dark',
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await deleteTask({id: p});
+          await deleteTask({ id: p });
         }
       });
     },
     [deleteTask]
   );
 
-  if (isLoading) return <p>Cargando tareas...</p>;
-  if (error) return <p>Error al cargar tareas: {error.message}</p>;
+  // Renderizar el estado con el formato correcto
+  const renderStatus = useCallback((status) => {
+    switch (status) {
+      case 'Active':
+        return <span className="badge badge-soft badge-info">Activa</span>;
+      case 'Complete':
+        return (
+          <span className="badge badge-soft badge-success">Completada</span>
+        );
+      default:
+        return <span className="badge badge-soft badge-error">No hechas</span>;
+    }
+  }, []);
+
+  if (isCurrentlyLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
+  }
+
+  if (currentError) {
+    return (
+      <div className="alert alert-error my-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="stroke-current shrink-0 h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span>Error al cargar tareas: {currentError.message}</span>
+      </div>
+    );
+  }
   return (
     <>
-      <div className="flex flex-col w-7xl gap-10 overflow-x-auto rounded-md border-b-4 border-neutral bg-base-100 shadow-sm">
-        <button
-          className="btn btn-warning w-1/6"
-          onClick={() => setOpenModaSaveTask(!openModaSaveTask)}
+      <div className="dropdown dropdown-right mb-4">
+        <div
+          tabIndex={0}
+          role="button"
+          className="btn btn-neutral"
+          onClick={() => setOpenFilterMenu(!openFilterMenu)}
         >
-          Nueva tarea
-          <span className="text-xl">
-            {v.iconoAgregar && <v.iconoAgregar />}
-          </span>
-        </button>
-        <table className="table table-zebra">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Descripcion</th>
-              <th>Icon</th>
-              <th>Estatus</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data ?? []).map((user) => (
-              <tr key={user.id}>
-                <td>{user.id.slice(0, 6)}</td>
-                <td>{user.title}</td>
-                <td>{user.description}</td>
-                <td>{user.icon}</td>
-                <td>
-                  {user.Status === 'Active' ? (
-                    <span className="badge badge-info">Active</span>
-                  ) : user.Status === 'Complete' ? (
-                    <span className="badge badge-success">Complete</span>
-                  ) : (
-                    <span className="badge badge-error">ItWasNot</span>
-                  )}
-                </td>
-                <td>
-                  <div className="flex flex-row gap-4">
-                    <button
-                      className="btn btn-soft btn-info"
-                      aria-label="Boton para editar una tarea"
-                      onClick={() =>
-                        handleOpenUpdateTask({
-                          id: user.id,
-                          title: user.title,
-                          description: user.description,
-                          icon: user.icon,
-                          status: user.Status,
-                        })
-                      }
-                    >
-                      {v.iconoEditar && <v.iconoEditar />}
-                    </button>
-                    <button
-                      className="btn btn-soft btn-error"
-                      aria-label="Boton para eliminar una tareaf"
-                      onClick={() => eliminar(user.id)}
-                    >
-                      {v.iconoBasura && <v.iconoBasura />}
-                    </button>
-                  </div>
-                </td>
+          Filtro de estatus {v.iconoFiltro && <v.iconoFiltro />}
+        </div>
+        <ul tabIndex={0} className="dropdown-content flex flex-row gap-2 ml-4">
+          <li>
+            <button
+              className={`btn text-lg ${
+                activeFilter === 'All' ? 'btn-neutral' : 'btn-outline'
+              }`}
+              onClick={() => setActiveFilter('All')}
+            >
+              {v.iconoTodasLasTareas && <v.iconoTodasLasTareas />}
+            </button>
+          </li>
+          <li>
+            <button
+              className={`btn text-lg ${
+                activeFilter === 'Active' ? 'btn-info' : 'btn-soft btn-info'
+              }`}
+              onClick={() => setActiveFilter('Active')}
+            >
+              {v.iconoActivas && <v.iconoActivas />}
+            </button>
+          </li>
+          <li>
+            <button
+              className={`btn text-lg ${
+                activeFilter === 'Complete'
+                  ? 'btn-success'
+                  : 'btn-soft btn-success'
+              }`}
+              onClick={() => setActiveFilter('Complete')}
+            >
+              {v.iconoCompletadas && <v.iconoCompletadas />}
+            </button>
+          </li>
+          <li>
+            <button
+              className={`btn text-lg ${
+                activeFilter === 'ItWasNot' ? 'btn-error' : 'btn-soft btn-error'
+              }`}
+              onClick={() => setActiveFilter('ItWasNot')}
+            >
+              {v.iconoNoCompletadas && <v.iconoNoCompletadas />}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      {/* Tabla con scroll horizontal */}
+      <div className="bg-base-100 rounded-lg shadow-md border border-t-4 border-neutral/60">
+        <div className="overflow-x-auto">
+          <table className="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Icon</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {displayData.length > 0 ? (
+                displayData.map((user) => (
+                  <tr key={user.id}>
+                    <td className="whitespace-nowrap">{user.id.slice(0, 6)}</td>
+                    <td className="whitespace-nowrap">{user.title}</td>
+                    <td className="max-w-xs">{user.description}</td>
+                    <td className="text-center text-lg">{user.icon}</td>
+                    <td className="whitespace-nowrap">
+                      {renderStatus(user.Status)}
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <div className="flex flex-row gap-2">
+                        <button
+                          className="btn btn-soft btn-info"
+                          aria-label="Editar tarea"
+                          onClick={() =>
+                            handleOpenUpdateTask({
+                              id: user.id,
+                              title: user.title,
+                              description: user.description,
+                              icon: user.icon,
+                              status: user.Status,
+                            })
+                          }
+                        >
+                          {v.iconoEditar && <v.iconoEditar />}
+                        </button>
+                        <button
+                          className="btn btn-soft btn-error"
+                          aria-label="Eliminar tarea"
+                          onClick={() => eliminar(user.id)}
+                        >
+                          {v.iconoBasura && <v.iconoBasura />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-8">
+                    No hay tareas que mostrar con el filtro seleccionado
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <ModalAgregarTareas

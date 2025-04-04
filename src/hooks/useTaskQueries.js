@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   listTask,
-  // listTaskActiveService,
-  // listTaskCompleteService,
-  // listTaskNotCompleteService,
+  listTaskActiveService,
+  listTaskCompleteService,
+  listTaskNotCompleteService,
   createNewTaskService,
   updateTaskService,
   deleteTaskService,
@@ -17,33 +17,37 @@ export const useTaskQueries = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['task'],
     queryFn: listTask,
-    staleTime: 1000 * 60,
-    retry: 2,
   });
 
   // Obtener las tareas que esten activas
-  // const { dataActive, isLoadingActive, errorActive } = useQuery({
-  //   queryKey: ['task'],
-  //   queryFn: listTaskActiveService,
-  //   staleTime: 1000 * 60,
-  //   retry: 2,
-  // });
+  const {
+    data: dataActive,
+    isLoadingActive,
+    errorActive,
+  } = useQuery({
+    queryKey: ['taskActive'],
+    queryFn: listTaskActiveService,
+  });
 
   // Obtener las tareas que esten completadas
-  // const { dataComplete, isLoadingComplete, errorComplete } = useQuery({
-  //   queryKey: ['task'],
-  //   queryFn: listTaskCompleteService,
-  //   staleTime: 1000 * 60,
-  //   retry: 2,
-  // });
+  const {
+    data: dataComplete,
+    isLoadingComplete,
+    errorComplete,
+  } = useQuery({
+    queryKey: ['taskComplete'],
+    queryFn: listTaskCompleteService,
+  });
 
   // Obtener las tareas que no esten completadas
-  // const { dataNotComplete, isLoadingNotComplete, errorNotComplete } = useQuery({
-  //   queryKey: ['task'],
-  //   queryFn: listTaskNotCompleteService,
-  //   staleTime: 1000 * 60,
-  //   retry: 2,
-  // });
+  const {
+    data: dataNotComplete,
+    isLoadingNotComplete,
+    errorNotComplete,
+  } = useQuery({
+    queryKey: ['taskNotComplete'],
+    queryFn: listTaskNotCompleteService,
+  });
 
   // Crear una nueva tarea
   const createTaskMutation = useMutation({
@@ -51,6 +55,9 @@ export const useTaskQueries = () => {
     onSuccess: (_, variables) => {
       // Agregar el estado global a zustand
       queryClient.invalidateQueries({ queryKey: ['task'] });
+      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
+      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
+      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
       toast.success(`Se creo correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -61,12 +68,14 @@ export const useTaskQueries = () => {
   const updateTaskMutation = useMutation({
     mutationFn: (taskEditData) => {
       updateTaskService(taskEditData);
-      console.log(taskEditData);
     },
 
     onSuccess: (_, variables) => {
       // Agregar el estado a zustand
       queryClient.invalidateQueries({ queryKey: ['task'] });
+      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
+      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
+      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
       toast.success(`Se edito correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -80,6 +89,9 @@ export const useTaskQueries = () => {
     onSuccess: (data) => {
       // Agregar el estado a zustand
       queryClient.invalidateQueries({ queryKey: ['task'] });
+      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
+      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
+      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
       toast.success(data.message, {
         duration: 5000,
       });
@@ -98,15 +110,15 @@ export const useTaskQueries = () => {
     data,
     isLoading,
     error,
-    // dataActive,
-    // dataComplete,
-    // dataNotComplete,
-    // isLoadingActive,
-    // isLoadingComplete,
-    // isLoadingNotComplete,
-    // errorActive,
-    // errorComplete,
-    // errorNotComplete,
+    dataActive,
+    dataComplete,
+    dataNotComplete,
+    isLoadingActive,
+    isLoadingComplete,
+    isLoadingNotComplete,
+    errorActive,
+    errorComplete,
+    errorNotComplete,
     createTask: createTaskMutation.mutate,
     updateTask: updateTaskMutation.mutate,
     deleteTask: deleteTaskMutation.mutate,
