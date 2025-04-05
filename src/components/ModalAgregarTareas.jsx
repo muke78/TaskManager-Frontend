@@ -1,18 +1,24 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from './ui/Modal/Modal';
 import { useForm } from 'react-hook-form';
 import { useTaskQueries } from '../hooks/useTaskQueries';
+import EmojiPicker from 'emoji-picker-react';
+import { createPortal } from 'react-dom';
 
 export const ModalAgregarTareas = ({
   openModaSaveTask,
   setOpenModaSaveTask,
 }) => {
-  const { createTask } = useTaskQueries();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiselect, setEmojiselect] = useState('😊');
+
+  const { createTaskAsync } = useTaskQueries();
   const {
     register,
     handleSubmit,
     reset,
     setFocus,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -21,16 +27,16 @@ export const ModalAgregarTareas = ({
 
   const onSaveTask = useCallback(
     async (data) => {
-      await createTask({
+      await createTaskAsync({
         title: data.nameTask,
         description: data.description,
         icon: data.icon,
         status: data.status,
       });
       reset();
-      setOpenModaSaveTask(!openModaSaveTask);
+      setOpenModaSaveTask(false);
     },
-    [createTask, reset, setOpenModaSaveTask, openModaSaveTask]
+    [createTaskAsync, reset, setOpenModaSaveTask]
   );
 
   useEffect(() => {
@@ -55,7 +61,7 @@ export const ModalAgregarTareas = ({
                 <input
                   type="text"
                   placeholder="Nombre de la tarea"
-                  className="input w-full text-base-content"
+                  className="input w-full text-base-content outline-none border-0 border-b-4"
                   {...register('nameTask', {
                     required: inputErrorText,
                   })}
@@ -69,7 +75,7 @@ export const ModalAgregarTareas = ({
                 <input
                   type="text"
                   placeholder="Descripcion de la tarea"
-                  className="input w-full text-base-content"
+                  className="input w-full text-base-content outline-none border-0 border-b-4"
                   {...register('description', {
                     required: inputErrorText,
                   })}
@@ -80,16 +86,46 @@ export const ModalAgregarTareas = ({
                   </p>
                 )}
               </div>
-              <div>
+              <div className="relative">
                 <label className="label">Icono</label>
-                <input
-                  type="text"
-                  placeholder="Icono"
-                  className="input w-full text-base-content"
-                  {...register('icon', {
-                    required: inputErrorText,
-                  })}
-                />
+                <div className="flex">
+                  <input
+                    className="input outline-none border-0 border-b-4 background-transparent text-2xl cursor-pointer"
+                    readOnly={true}
+                    value={emojiselect}
+                    type="text"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    {...register('icon', {
+                      required: inputErrorText,
+                    })}
+                  />
+                </div>
+
+                {showEmojiPicker &&
+                  createPortal(
+                    <div
+                      style={{
+                        position: 'absolute',
+                        translate: '0 -50%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 9999,
+                      }}
+                    >
+                      <EmojiPicker
+                        emojiStyle="apple"
+                        theme="dark"
+                        autoFocusSearch={true}
+                        onEmojiClick={(emojiData) => {
+                          setValue('icon', emojiData.emoji);
+                          setEmojiselect(emojiData.emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                      />
+                    </div>,
+                    document.body
+                  )}
+
                 {errors.icon && (
                   <p className="text-primary p-0">{errors.icon?.message}</p>
                 )}
@@ -97,7 +133,7 @@ export const ModalAgregarTareas = ({
               <div>
                 <label className="label">Estatus</label>
                 <select
-                  className="select w-full"
+                  className="select w-full outline-none border-0 border-b-4"
                   {...register('status', {
                     required: inputErrorText,
                   })}

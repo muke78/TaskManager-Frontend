@@ -9,11 +9,11 @@ export const ModalEditarTareas = ({
   openModaUpdateTask,
   setOpenModaUpdateTask,
 }) => {
-  const { updateTask } = useTaskQueries();
+  const { updateTaskAsync } = useTaskQueries();
   const { setFocus } = useForm();
 
   const handleUpdateTask = useCallback(async () => {
-    await updateTask({
+    await updateTaskAsync({
       id: selectedUser.id,
       title: selectedUser.title,
       description: selectedUser.description,
@@ -29,7 +29,7 @@ export const ModalEditarTareas = ({
     selectedUser.status,
     setOpenModaUpdateTask,
     openModaUpdateTask,
-    updateTask,
+    updateTaskAsync,
   ]);
 
   useEffect(() => {

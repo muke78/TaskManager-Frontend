@@ -20,7 +20,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
     errorActive,
     errorComplete,
     errorNotComplete,
-    deleteTask,
+    deleteTaskAsync,
   } = useTaskQueries();
 
   const [openModaUpdateTask, setOpenModaUpdateTask] = useState(false);
@@ -50,7 +50,6 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         setCurrentError(errorNotComplete);
         break;
       case 'All':
-      default:
         setDisplayData(data || []);
         setIsCurrentlyLoading(isLoading);
         setCurrentError(error);
@@ -72,6 +71,8 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
     errorNotComplete,
   ]);
 
+  console.log(dataActive)
+
   // Callback para abrir modal de edición
   const handleOpenUpdateTask = useCallback((user) => {
     setSelectedUser(user);
@@ -92,11 +93,11 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         theme: 'dark',
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await deleteTask({ id: p });
+          await deleteTaskAsync({ id: p });
         }
       });
     },
-    [deleteTask]
+    [deleteTaskAsync]
   );
 
   // Renderizar el estado con el formato correcto
@@ -113,34 +114,6 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
     }
   }, []);
 
-  if (isCurrentlyLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="loading loading-spinner loading-lg"></div>
-      </div>
-    );
-  }
-
-  if (currentError) {
-    return (
-      <div className="alert alert-error my-4">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="stroke-current shrink-0 h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span>Error al cargar tareas: {currentError.message}</span>
-      </div>
-    );
-  }
   return (
     <>
       <div className="dropdown dropdown-right mb-4">
@@ -198,70 +171,84 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         </ul>
       </div>
 
+      {/* Mensajes condicionales */}
+      {displayData && displayData.length === 0 && (
+        <div className="alert alert-info my-4">
+          <span className="text-xl">
+            {v.iconoAdvertencia && <v.iconoAdvertencia />}
+          </span>
+          <span>No hay tareas que mostrar</span>
+        </div>
+      )}
+
       {/* Tabla con scroll horizontal */}
-      <div className="bg-base-100 rounded-lg shadow-md border border-t-4 border-neutral/60">
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Icon</th>
-                <th>Estatus</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayData.length > 0 ? (
-                displayData.map((user) => (
-                  <tr key={user.id}>
-                    <td className="whitespace-nowrap">{user.id.slice(0, 6)}</td>
-                    <td className="whitespace-nowrap">{user.title}</td>
-                    <td className="max-w-xs">{user.description}</td>
-                    <td className="text-center text-lg">{user.icon}</td>
-                    <td className="whitespace-nowrap">
-                      {renderStatus(user.Status)}
-                    </td>
-                    <td className="whitespace-nowrap">
-                      <div className="flex flex-row gap-2">
-                        <button
-                          className="btn btn-soft btn-info"
-                          aria-label="Editar tarea"
-                          onClick={() =>
-                            handleOpenUpdateTask({
-                              id: user.id,
-                              title: user.title,
-                              description: user.description,
-                              icon: user.icon,
-                              status: user.Status,
-                            })
-                          }
-                        >
-                          {v.iconoEditar && <v.iconoEditar />}
-                        </button>
-                        <button
-                          className="btn btn-soft btn-error"
-                          aria-label="Eliminar tarea"
-                          onClick={() => eliminar(user.id)}
-                        >
-                          {v.iconoBasura && <v.iconoBasura />}
-                        </button>
-                      </div>
+      {!isCurrentlyLoading && !currentError && displayData.length > 0 && (
+        <div className="bg-base-100 rounded-lg shadow-md border border-t-4 border-neutral/60">
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Icon</th>
+                  <th>Estatus</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayData.length > 0 ? (
+                  displayData.map((user) => (
+                    <tr key={user.id}>
+                      <td className="whitespace-nowrap">
+                        {user.id.slice(0, 6)}
+                      </td>
+                      <td className="whitespace-nowrap">{user.title}</td>
+                      <td className="max-w-xs">{user.description}</td>
+                      <td className="text-center text-lg">{user.icon}</td>
+                      <td className="whitespace-nowrap">
+                        {renderStatus(user.Status)}
+                      </td>
+                      <td className="whitespace-nowrap">
+                        <div className="flex flex-row gap-2">
+                          <button
+                            className="btn btn-soft btn-info"
+                            aria-label="Editar tarea"
+                            onClick={() =>
+                              handleOpenUpdateTask({
+                                id: user.id,
+                                title: user.title,
+                                description: user.description,
+                                icon: user.icon,
+                                status: user.Status,
+                              })
+                            }
+                          >
+                            {v.iconoEditar && <v.iconoEditar />}
+                          </button>
+                          <button
+                            className="btn btn-soft btn-error"
+                            aria-label="Eliminar tarea"
+                            onClick={() => eliminar(user.id)}
+                          >
+                            {v.iconoBasura && <v.iconoBasura />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-8">
+                      No hay tareas que mostrar con el filtro seleccionado
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-8">
-                    No hay tareas que mostrar con el filtro seleccionado
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       <ModalAgregarTareas
         openModaSaveTask={openModaSaveTask}

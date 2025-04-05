@@ -5,7 +5,7 @@ import { ModalBody } from '../Modal/ModalBody';
 export const Modal = ({ onClose, title, children, onSave, saveButtonText }) => {
   return (
     <div className="modal modal-open">
-      <div className="modal-box">
+      <div className="modal-box relative z-10">
         <ModalHeader title={title} />
         <ModalBody>{children}</ModalBody>
         <ModalFooter

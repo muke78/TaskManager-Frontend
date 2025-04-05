@@ -1,4 +1,5 @@
 import React from 'react';
+import { v } from '../../../styles/variables';
 
 export const ModalFooter = ({ onClose, onSave, saveButtonText }) => {
   return (
@@ -8,6 +9,7 @@ export const ModalFooter = ({ onClose, onSave, saveButtonText }) => {
       </button>
       {onSave && (
         <button className="btn btn-info" onClick={onSave}>
+          {v.iconoGuardar && <v.iconoGuardar />}
           {saveButtonText}
         </button>
       )}

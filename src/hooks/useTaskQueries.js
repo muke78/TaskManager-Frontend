@@ -58,9 +58,16 @@ export const useTaskQueries = () => {
       queryClient.invalidateQueries({ queryKey: ['taskActive'] });
       queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
       queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
+
       toast.success(`Se creo correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || error.message || 'Ocurrió un error',
+        { duration: 5000 }
+      );
     },
   });
 
@@ -119,8 +126,8 @@ export const useTaskQueries = () => {
     errorActive,
     errorComplete,
     errorNotComplete,
-    createTask: createTaskMutation.mutate,
-    updateTask: updateTaskMutation.mutate,
-    deleteTask: deleteTaskMutation.mutate,
+    createTaskAsync: createTaskMutation.mutateAsync,
+    updateTaskAsync: updateTaskMutation.mutateAsync,
+    deleteTaskAsync: deleteTaskMutation.mutateAsync,
   };
 };
