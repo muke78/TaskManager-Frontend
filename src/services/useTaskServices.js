@@ -3,9 +3,10 @@ import { api } from '../config/api';
 export const listTask = async (status = 'All') => {
   try {
     const response = await api.get(`/task/${status}`);
-    return response.data;
+    return response.data || [];
   } catch (error) {
     console.error('Ocurrio un error get', error);
+    return [];
   }
 };
 

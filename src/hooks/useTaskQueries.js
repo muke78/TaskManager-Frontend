@@ -14,9 +14,17 @@ export const useTaskQueries = (activeFilter) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['task', activeFilter],
     queryFn: () => listTask(activeFilter),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
-    // enabled: !!activeFilter,
+    enabled: !!activeFilter, // opcional si puede ser null al inicio
+    onError: (error) => {
+      console.error(error); // Asegúrate de loguear el error para depurar
+    },
+    onSuccess: (data) => {
+      if (!data) {
+        return []; // Evitar que la data sea undefined
+      }
+    },
   });
 
   // Crear una nueva tarea
@@ -24,7 +32,8 @@ export const useTaskQueries = (activeFilter) => {
     mutationFn: (taskData) => createNewTaskService(taskData),
     onSuccess: (_, variables) => {
       // Agregar el estado global a zustand
-      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
+      console.log('Invalidando query post...');
+      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
       toast.success(`Se creo correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -39,12 +48,11 @@ export const useTaskQueries = (activeFilter) => {
 
   // Actualiza una tarea
   const updateTaskMutation = useMutation({
-    mutationFn: (taskEditData) => {
-      updateTaskService(taskEditData);
-    },
+    mutationFn: (taskEditData) => updateTaskService(taskEditData),
     onSuccess: (_, variables) => {
       // Agregar el estado a zustand
-      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
+      console.log('Invalidando query put...');
+      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
       toast.success(`Se edito correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -57,7 +65,7 @@ export const useTaskQueries = (activeFilter) => {
     mutationFn: (id) => deleteTaskService(id),
     onSuccess: (data) => {
       // Agregar el estado a zustand
-      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
+      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
       toast.success(data.message, {
         duration: 5000,
       });

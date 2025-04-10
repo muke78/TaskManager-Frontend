@@ -7,7 +7,6 @@ import Swal from 'sweetalert2';
 
 export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
   // Importamos los hooks de las tareas por medio de nuestros queries y nuestras mutaciones
-
   const [openModaUpdateTask, setOpenModaUpdateTask] = useState(false);
   const [selectedUser, setSelectedUser] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -20,10 +19,17 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
     useTaskQueries(activeFilter);
 
   useEffect(() => {
-    setDisplayData(data || []);
+    if (data && data.length > 0) {
+      setDisplayData(data);
+    }
+
+    if (!data || data.length === 0) {
+      setDisplayData([]); // opcional: limpiar si no hay datos
+    }
     setIsCurrentlyLoading(isLoading);
     setCurrentError(error);
-  }, [data, isLoading, error]);
+    setActiveFilter(activeFilter);
+  }, [data, isLoading, error, activeFilter]);
 
   // Callback para abrir modal de edición
   const handleOpenUpdateTask = useCallback((user) => {
@@ -77,7 +83,10 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         >
           Filtro de estatus {v.iconoFiltro && <v.iconoFiltro />}
         </div>
-        <ul tabIndex={0} className="dropdown-content flex flex-row text-nowrap gap-2 ml-4">
+        <ul
+          tabIndex={0}
+          className="dropdown-content flex flex-row text-nowrap gap-2 ml-4"
+        >
           <li>
             <button
               className={`btn text-lg ${
@@ -114,7 +123,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
             </button>
           </li>
           <li>
-            <button 
+            <button
               className={`btn text-lg ${
                 activeFilter === 'ItWasNot' ? 'btn-error' : 'btn-soft btn-error'
               }`}
@@ -128,7 +137,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
       </div>
 
       {/* Mensajes condicionales */}
-      {displayData && displayData.length === 0 && (
+      {displayData.length === 0 && (
         <div className="alert alert-info my-4">
           <span className="text-xl">
             {v.iconoAdvertencia && <v.iconoAdvertencia />}
