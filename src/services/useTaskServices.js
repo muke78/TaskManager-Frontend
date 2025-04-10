@@ -1,23 +1,12 @@
 import { api } from '../config/api';
 
-export const listTask = async () => {
-  const response = await api.get('/task');
-  return response.data;
-};
-
-export const listTaskActiveService = async () => {
-  const response = await api.get('/task-progress');
-  return response.data;
-};
-
-export const listTaskCompleteService = async () => {
-  const response = await api.get('/task-complete');
-  return response.data;
-};
-
-export const listTaskNotCompleteService = async () => {
-  const response = await api.get('/task-itWasNot');
-  return response.data;
+export const listTask = async (status = 'All') => {
+  try {
+    const response = await api.get(`/task/${status}`);
+    return response.data;
+  } catch (error) {
+    console.error('Ocurrio un error get', error);
+  }
 };
 
 export const createNewTaskService = async ({
@@ -26,13 +15,17 @@ export const createNewTaskService = async ({
   icon,
   status,
 }) => {
-  const response = await api.post('/new-task', {
-    title,
-    description,
-    icon,
-    status,
-  });
-  return response.data;
+  try {
+    const response = await api.post('/new-task', {
+      title,
+      description,
+      icon,
+      status,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ocurrio un error post', error);
+  }
 };
 
 export const updateTaskService = async ({
@@ -42,17 +35,25 @@ export const updateTaskService = async ({
   icon,
   status,
 }) => {
-  const response = await api.put('/update-task', {
-    id,
-    title,
-    description,
-    icon,
-    status,
-  });
-  return response.data;
+  try {
+    const response = await api.put('/update-task', {
+      id,
+      title,
+      description,
+      icon,
+      status,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ocurrio un error put', error);
+  }
 };
 
 export const deleteTaskService = async ({ id }) => {
-  const response = await api.delete(`/delete-task/${id}`);
-  return response.data;
+  try {
+    const response = await api.delete(`/delete-task/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Ocurrio un error delete', error);
+  }
 };

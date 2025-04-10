@@ -106,7 +106,7 @@ export const ModalAgregarTareas = ({
                     <div
                       style={{
                         position: 'absolute',
-                        translate: '0 -50%',
+                        translate: '0 -120%',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         zIndex: 9999,

@@ -2,51 +2,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   listTask,
-  listTaskActiveService,
-  listTaskCompleteService,
-  listTaskNotCompleteService,
   createNewTaskService,
   updateTaskService,
   deleteTaskService,
 } from '../services/useTaskServices';
 
-export const useTaskQueries = () => {
+export const useTaskQueries = (activeFilter) => {
   const queryClient = useQueryClient();
 
-  // Obtener todas las tareas
+  // Obtener todas las tareas con filtro
   const { data, isLoading, error } = useQuery({
-    queryKey: ['task'],
-    queryFn: listTask,
-  });
-
-  // Obtener las tareas que esten activas
-  const {
-    data: dataActive,
-    isLoadingActive,
-    errorActive,
-  } = useQuery({
-    queryKey: ['taskActive'],
-    queryFn: listTaskActiveService,
-  });
-
-  // Obtener las tareas que esten completadas
-  const {
-    data: dataComplete,
-    isLoadingComplete,
-    errorComplete,
-  } = useQuery({
-    queryKey: ['taskComplete'],
-    queryFn: listTaskCompleteService,
-  });
-
-  // Obtener las tareas que no esten completadas
-  const {
-    data: dataNotComplete,
-    isLoadingNotComplete,
-    errorNotComplete,
-  } = useQuery({
-    queryKey: ['taskNotComplete'],
-    queryFn: listTaskNotCompleteService,
+    queryKey: ['task', activeFilter],
+    queryFn: () => listTask(activeFilter),
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: false,
+    // enabled: !!activeFilter,
   });
 
   // Crear una nueva tarea
@@ -54,11 +24,7 @@ export const useTaskQueries = () => {
     mutationFn: (taskData) => createNewTaskService(taskData),
     onSuccess: (_, variables) => {
       // Agregar el estado global a zustand
-      queryClient.invalidateQueries({ queryKey: ['task'] });
-      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
-      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
-      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
-
+      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
       toast.success(`Se creo correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -76,13 +42,9 @@ export const useTaskQueries = () => {
     mutationFn: (taskEditData) => {
       updateTaskService(taskEditData);
     },
-
     onSuccess: (_, variables) => {
       // Agregar el estado a zustand
-      queryClient.invalidateQueries({ queryKey: ['task'] });
-      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
-      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
-      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
+      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
       toast.success(`Se edito correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -95,10 +57,7 @@ export const useTaskQueries = () => {
     mutationFn: (id) => deleteTaskService(id),
     onSuccess: (data) => {
       // Agregar el estado a zustand
-      queryClient.invalidateQueries({ queryKey: ['task'] });
-      queryClient.invalidateQueries({ queryKey: ['taskActive'] });
-      queryClient.invalidateQueries({ queryKey: ['taskComplete'] });
-      queryClient.invalidateQueries({ queryKey: ['taskNotComplete'] });
+      queryClient.invalidateQueries({ queryKey: ['task', activeFilter] });
       toast.success(data.message, {
         duration: 5000,
       });
@@ -117,15 +76,6 @@ export const useTaskQueries = () => {
     data,
     isLoading,
     error,
-    dataActive,
-    dataComplete,
-    dataNotComplete,
-    isLoadingActive,
-    isLoadingComplete,
-    isLoadingNotComplete,
-    errorActive,
-    errorComplete,
-    errorNotComplete,
     createTaskAsync: createTaskMutation.mutateAsync,
     updateTaskAsync: updateTaskMutation.mutateAsync,
     deleteTaskAsync: deleteTaskMutation.mutateAsync,

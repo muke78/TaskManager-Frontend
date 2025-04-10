@@ -7,21 +7,6 @@ import Swal from 'sweetalert2';
 
 export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
   // Importamos los hooks de las tareas por medio de nuestros queries y nuestras mutaciones
-  const {
-    data,
-    dataActive,
-    dataComplete,
-    dataNotComplete,
-    isLoading,
-    isLoadingActive,
-    isLoadingComplete,
-    isLoadingNotComplete,
-    error,
-    errorActive,
-    errorComplete,
-    errorNotComplete,
-    deleteTaskAsync,
-  } = useTaskQueries();
 
   const [openModaUpdateTask, setOpenModaUpdateTask] = useState(false);
   const [selectedUser, setSelectedUser] = useState(false);
@@ -31,47 +16,14 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
   const [currentError, setCurrentError] = useState(null);
   const [openFilterMenu, setOpenFilterMenu] = useState(false);
 
-  // Efecto para actualizar los datos mostrados según el filtro seleccionado
-  useEffect(() => {
-    switch (activeFilter) {
-      case 'Active':
-        setDisplayData(dataActive || []);
-        setIsCurrentlyLoading(isLoadingActive);
-        setCurrentError(errorActive);
-        break;
-      case 'Complete':
-        setDisplayData(dataComplete || []);
-        setIsCurrentlyLoading(isLoadingComplete);
-        setCurrentError(errorComplete);
-        break;
-      case 'ItWasNot':
-        setDisplayData(dataNotComplete || []);
-        setIsCurrentlyLoading(isLoadingNotComplete);
-        setCurrentError(errorNotComplete);
-        break;
-      case 'All':
-        setDisplayData(data || []);
-        setIsCurrentlyLoading(isLoading);
-        setCurrentError(error);
-        break;
-    }
-  }, [
-    activeFilter,
-    data,
-    dataActive,
-    dataComplete,
-    dataNotComplete,
-    isLoading,
-    isLoadingActive,
-    isLoadingComplete,
-    isLoadingNotComplete,
-    error,
-    errorActive,
-    errorComplete,
-    errorNotComplete,
-  ]);
+  const { data, isLoading, error, deleteTaskAsync } =
+    useTaskQueries(activeFilter);
 
-  console.log(dataActive)
+  useEffect(() => {
+    setDisplayData(data || []);
+    setIsCurrentlyLoading(isLoading);
+    setCurrentError(error);
+  }, [data, isLoading, error]);
 
   // Callback para abrir modal de edición
   const handleOpenUpdateTask = useCallback((user) => {
@@ -125,7 +77,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         >
           Filtro de estatus {v.iconoFiltro && <v.iconoFiltro />}
         </div>
-        <ul tabIndex={0} className="dropdown-content flex flex-row gap-2 ml-4">
+        <ul tabIndex={0} className="dropdown-content flex flex-row text-nowrap gap-2 ml-4">
           <li>
             <button
               className={`btn text-lg ${
@@ -134,6 +86,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
               onClick={() => setActiveFilter('All')}
             >
               {v.iconoTodasLasTareas && <v.iconoTodasLasTareas />}
+              <span className="text-base">Todas</span>
             </button>
           </li>
           <li>
@@ -144,6 +97,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
               onClick={() => setActiveFilter('Active')}
             >
               {v.iconoActivas && <v.iconoActivas />}
+              <span className="text-base">Activas</span>
             </button>
           </li>
           <li>
@@ -156,16 +110,18 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
               onClick={() => setActiveFilter('Complete')}
             >
               {v.iconoCompletadas && <v.iconoCompletadas />}
+              <span className="text-base">Completadas</span>
             </button>
           </li>
           <li>
-            <button
+            <button 
               className={`btn text-lg ${
                 activeFilter === 'ItWasNot' ? 'btn-error' : 'btn-soft btn-error'
               }`}
               onClick={() => setActiveFilter('ItWasNot')}
             >
               {v.iconoNoCompletadas && <v.iconoNoCompletadas />}
+              <span className="text-base">No hechas</span>
             </button>
           </li>
         </ul>
