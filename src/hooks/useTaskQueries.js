@@ -1,28 +1,31 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import {
   listTask,
   createNewTaskService,
   updateTaskService,
   deleteTaskService,
-} from '../services/useTaskServices';
+  deleteTaskBulkService,
+} from "../services/useTaskServices";
+import { useTaskStore } from "../store/taskStore";
 
 export const useTaskQueries = (activeFilter) => {
   const queryClient = useQueryClient();
+  const { setTasks, addTask, updateTask, removeTask } = useTaskStore();
 
   // Obtener todas las tareas con filtro
   const { data, isLoading, error } = useQuery({
-    queryKey: ['task', activeFilter],
+    queryKey: ["task", activeFilter],
     queryFn: () => listTask(activeFilter),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
-    enabled: !!activeFilter, // opcional si puede ser null al inicio
+    enabled: !!activeFilter,
     onError: (error) => {
-      console.error(error); // Asegúrate de loguear el error para depurar
+      console.error(error);
     },
     onSuccess: (data) => {
-      if (!data) {
-        return []; // Evitar que la data sea undefined
+      if (data) {
+        setTasks(data);
       }
     },
   });
@@ -31,16 +34,15 @@ export const useTaskQueries = (activeFilter) => {
   const createTaskMutation = useMutation({
     mutationFn: (taskData) => createNewTaskService(taskData),
     onSuccess: (_, variables) => {
-      // Agregar el estado global a zustand
-      console.log('Invalidando query post...');
-      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
+      addTask(variables);
+      queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
       toast.success(`Se creo correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || error.message || 'Ocurrió un error',
+        error.response?.data?.message || error.message || "Ocurrió un error",
         { duration: 5000 }
       );
     },
@@ -50,9 +52,8 @@ export const useTaskQueries = (activeFilter) => {
   const updateTaskMutation = useMutation({
     mutationFn: (taskEditData) => updateTaskService(taskEditData),
     onSuccess: (_, variables) => {
-      // Agregar el estado a zustand
-      console.log('Invalidando query put...');
-      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
+      updateTask(variables.id, variables);
+      queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
       toast.success(`Se edito correctamente la tarea ${variables.title}`, {
         duration: 5000,
       });
@@ -60,19 +61,36 @@ export const useTaskQueries = (activeFilter) => {
   });
 
   // Eliminar una tarea
-
   const deleteTaskMutation = useMutation({
     mutationFn: (id) => deleteTaskService(id),
-    onSuccess: (data) => {
-      // Agregar el estado a zustand
-      queryClient.invalidateQueries({ queryKey: ['task'], exact: false });
+    onSuccess: (data, id) => {
+      removeTask(id);
+      queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
       toast.success(data.message, {
         duration: 5000,
       });
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || error.message || 'Ocurrió un error',
+        error.response?.data?.message || error.message || "Ocurrió un error",
+        {
+          duration: 5000,
+        }
+      );
+    },
+  });
+
+  const deleteTaskBulkMutation = useMutation({
+    mutationFn: (ids) => deleteTaskBulkService(ids),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
+      toast.success(data.message , {
+        duration: 5000,
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || error.message || "Ocurrió un error",
         {
           duration: 5000,
         }
@@ -87,5 +105,6 @@ export const useTaskQueries = (activeFilter) => {
     createTaskAsync: createTaskMutation.mutateAsync,
     updateTaskAsync: updateTaskMutation.mutateAsync,
     deleteTaskAsync: deleteTaskMutation.mutateAsync,
+    deleteTaskBulkAsync: deleteTaskBulkMutation.mutateAsync,
   };
 };

@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-import { TableTask } from './components/TableTask';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster } from 'react-hot-toast';
-import { v } from './styles/variables';
-import { useTheme } from './hooks/useTheme';
+import React, { useState } from "react";
+import { TableTask } from "./components/TableTask";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "react-hot-toast";
+import { v } from "./styles/variables";
+import { useTheme } from "./hooks/useTheme";
 
 export const App = () => {
   const [openModaSaveTask, setOpenModaSaveTask] = useState(false);
-  const { changeTheme, setChangeTheme, mounted } = useTheme();
-
-  const toggleTheme = () => {
-    setChangeTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-
-  if (!mounted) return null;
+  const { changeTheme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-scree flex flex-col bg-base-100 text-base-content">
@@ -33,7 +27,7 @@ export const App = () => {
                 className="swap swap-rotate"
                 aria-label="Cambio de tema"
               >
-                {changeTheme === 'dark' ? (
+                {changeTheme === "night" ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -96,7 +90,16 @@ export const App = () => {
             />
           </div>
 
-          <Toaster position="bottom-right" reverseOrder={false} />
+          <Toaster
+            position="bottom-right"
+            reverseOrder={false}
+            toastOptions={{
+              style: {
+                background: `${changeTheme === "night" ? "#1e293b" : changeTheme === "caramellatte" ? "#c93400" : "#c93400"}`,
+                color: `${changeTheme === "night" ? "#eceff4" : changeTheme === "caramellatte" ? "#eceff4" : "#0f172a"}`,
+              },
+            }}
+          />
         </section>
       </main>
 

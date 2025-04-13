@@ -1,26 +1,17 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { useThemeStore } from "../store/themeStore";
 
 export const useTheme = () => {
-  const [changeTheme, setChangeTheme] = useState('');
-  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('theme');
-    setChangeTheme(storedTheme);
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      document.documentElement.setAttribute('data-theme', changeTheme);
-      localStorage.setItem('theme', changeTheme);
-    }
-  }, [changeTheme, mounted]);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, []); // Only run once on mount
 
   return {
-    changeTheme,
-    setChangeTheme,
-    mounted,
+    changeTheme: theme,
+    setChangeTheme: setTheme,
+    toggleTheme,
+    mounted: true,
   };
 };

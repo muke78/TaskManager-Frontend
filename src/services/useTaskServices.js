@@ -26,6 +26,7 @@ export const createNewTaskService = async ({
     return response.data;
   } catch (error) {
     console.error('Ocurrio un error post', error);
+    throw error;
   }
 };
 
@@ -47,6 +48,7 @@ export const updateTaskService = async ({
     return response.data;
   } catch (error) {
     console.error('Ocurrio un error put', error);
+    throw error;
   }
 };
 
@@ -56,5 +58,18 @@ export const deleteTaskService = async ({ id }) => {
     return response.data;
   } catch (error) {
     console.error('Ocurrio un error delete', error);
+    throw error;
+  }
+};
+
+export const deleteTaskBulkService = async ({ ids }) => {
+  try {
+    const response = await api.delete('/bulk-delete', {
+      data: { ids },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Ocurrio un error deleteBulk', error);
+    throw error;
   }
 };
