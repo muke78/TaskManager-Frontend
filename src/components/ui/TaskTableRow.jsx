@@ -35,7 +35,7 @@ export const TaskTableRow = ({
     <td className="text-center text-lg">{user.icon}</td>
     <td className="whitespace-nowrap">{renderStatus(user.Status)}</td>
     <td>
-      <div className="dropdown dropdown-bottom">
+      <div className="dropdown dropdown-right">
         <div tabIndex={0} role="button" className="btn m-1">
           ...
         </div>

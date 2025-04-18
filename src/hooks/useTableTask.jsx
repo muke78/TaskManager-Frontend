@@ -202,8 +202,8 @@ export const useTableTask = () => {
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: selectedIds,
     onSortingChange: setSorting,
-  });
-
+  })
+   
   return {
     // States
     openModaUpdateTask,

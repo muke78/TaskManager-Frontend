@@ -28,12 +28,10 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
     renderStatus,
   } = useTableTask();
 
+  // const datosTabla = table.getHeaderGroups().map((headerGroup) => headerGroup);
+
   return (
     <>
-      {/* <StatusFilter
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-      /> */}
       <div className="flex flex-col p-2 md:flex-row items-center justify-between gap-2">
         <fieldset className="fieldset">
           <label className="label">
@@ -53,7 +51,7 @@ export const TableTask = ({ openModaSaveTask, setOpenModaSaveTask }) => {
         {Object.keys(selectedIds).filter((id) => selectedIds[id]).length >
           0 && (
           <button
-            className="btn btn-error btn-soft"
+            className="btn btn-error"
             onClick={() => eliminarSeleccionados()}
           >
             Eliminar seleccionados (
