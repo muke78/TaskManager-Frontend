@@ -43,7 +43,7 @@ export const useTableTask = () => {
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Si, eliminar",
-        theme: changeTheme === "night" ? "dark" : "light",
+        theme: changeTheme === "dark" ? "dark" : "light",
       }).then(async (result) => {
         if (result.isConfirmed) {
           await deleteTaskAsync({ id });
@@ -64,7 +64,7 @@ export const useTableTask = () => {
       cancelButtonColor: "#d33",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      theme: changeTheme === "night" ? "dark" : "light",
+      theme: changeTheme === "dark" ? "dark" : "light",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await deleteTaskBulkAsync({ ids: selectedIds });

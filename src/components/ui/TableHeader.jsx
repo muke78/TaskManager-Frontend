@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const TaskTableHeader = ({ isChecked, onCheckAll }) => (
   <thead>
@@ -11,12 +11,13 @@ export const TaskTableHeader = ({ isChecked, onCheckAll }) => (
           className="checkbox checkbox-primary"
         />
       </th>
+      <th>Editar</th>
       <th>ID</th>
       <th>Nombre</th>
       <th>Descripción</th>
       <th>Icon</th>
       <th>Estatus</th>
-      <th>Acciones</th>
+      <th>Mas opciones</th>
     </tr>
   </thead>
 );

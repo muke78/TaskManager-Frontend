@@ -27,7 +27,7 @@ export const App = () => {
                 className="swap swap-rotate"
                 aria-label="Cambio de tema"
               >
-                {changeTheme === "night" ? (
+                {changeTheme === "dark" ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -95,8 +95,8 @@ export const App = () => {
             reverseOrder={false}
             toastOptions={{
               style: {
-                background: `${changeTheme === "night" ? "#1e293b" : changeTheme === "caramellatte" ? "#c93400" : "#c93400"}`,
-                color: `${changeTheme === "night" ? "#eceff4" : changeTheme === "caramellatte" ? "#eceff4" : "#0f172a"}`,
+                background: `${changeTheme === "dark" ? "#191e24" : changeTheme === "light" ? "#09090b" : "#09090b"}`,
+                color: `${changeTheme === "dark" ? "#eceff4" : changeTheme === "light" ? "#eceff4" : "#0f172a"}`,
               },
             }}
           />

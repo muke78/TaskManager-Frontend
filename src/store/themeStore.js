@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
 export const useThemeStore = create((set) => ({
-  theme: localStorage.getItem("theme") || "caramellatte",
+  theme: localStorage.getItem("theme") || "light",
   setTheme: (newTheme) => {
     const theme =
       typeof newTheme === "function"
-        ? newTheme(localStorage.getItem("theme") || "caramellatte")
+        ? newTheme(localStorage.getItem("theme") || "light")
         : newTheme;
 
     document.documentElement.setAttribute("data-theme", theme);
@@ -15,7 +15,7 @@ export const useThemeStore = create((set) => ({
   toggleTheme: () => {
     set((state) => {
       const newTheme =
-        state.theme === "caramellatte" ? "night" : "caramellatte";
+        state.theme === "light" ? "dark" : "light";
       document.documentElement.setAttribute("data-theme", newTheme);
       localStorage.setItem("theme", newTheme);
       return { theme: newTheme };
