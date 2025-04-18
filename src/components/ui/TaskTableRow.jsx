@@ -1,5 +1,5 @@
 import React from 'react';
-// import { v } from '../../styles/variables';
+import { v } from '../../styles/variables';
 
 export const TaskTableRow = ({
   user,
@@ -25,8 +25,7 @@ export const TaskTableRow = ({
           aria-label="Editar tarea"
           onClick={() => onEdit(user)}
         >
-          ✏️
-          {/* {v.iconoEditar && <v.iconoEditar />} */}
+          {v.iconoEditar && <v.iconoEditar />}
         </button>
       </div>
     </td>
@@ -46,12 +45,11 @@ export const TaskTableRow = ({
         >
           <li>
             <button
-              className="btn btn-error btn-soft"
+              className="btn btn-error"
               aria-label="Eliminar tarea"
               onClick={() => onDelete(user.id)}
             >
-              🗑️
-              {/* {v.iconoBasura && <v.iconoBasura />} */}
+              {v.iconoBasura && <v.iconoBasura />}
             </button>
           </li>
         </ul>

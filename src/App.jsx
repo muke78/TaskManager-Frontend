@@ -70,7 +70,7 @@ export const App = () => {
 
       {/* Contenido principal */}
       <main className="flex-grow container mx-auto px-4 py-8">
-        <section className="max-w-4xl mx-auto">
+        <section className="max-w-7xl mx-auto">
           <div className="flex justify-center md:justify-start mb-6">
             <button
               className="btn btn-warning flex items-center gap-2"
